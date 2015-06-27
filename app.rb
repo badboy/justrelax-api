@@ -8,6 +8,7 @@ require 'open-uri'
 require 'uri'
 require 'rack'
 require 'base64'
+require 'redic'
 
 require "cuba"
 require "cuba/contrib"
@@ -56,7 +57,7 @@ end
 def parse_result text
   h = Oga.parse_html(text)
 
-  title     = text_or_empty(h, "h3")
+  title     = text_or_empty(h, "h3").gsub(/,$/,'')
 
   price_max = text_or_empty(h, ".price_max")
   price_min = text_or_empty(h, ".price_min")
@@ -106,6 +107,20 @@ def new_params(from, to, location)
   }
 end
 
+def redis
+  @@redis ||= Redic.new
+end
+
+def cached(from,to,location)
+  key = "%s/%s/%s" % [from,to,location]
+  redis.call("GET", key)
+end
+
+def cache_now(from,to,location,data)
+  key = "%s/%s/%s" % [from,to,location]
+  redis.call("SET", key, data, "EX", 60*60)
+end
+
 Cuba.plugin Cuba::Mote
 Cuba.plugin Cuba::TextHelpers
 
@@ -117,22 +132,28 @@ Cuba.use Rack::Session::Cookie, :secret => "EsnoAqxjvP0RGWHo8TpLFVXtzhrsa2"
 Cuba.define do
   on get do
     on "holiday", param("from"), param("to"), param("location") do |from,to,location|
-      params = new_params(from,to,location)
-      url = URL_BASE + params_to_url(params)
-      doc = JSON.parse(open(url).read)
-      items = doc["items"]
-
-      p params
-      p url
-
-      j = items.map { |item|
-        t = parse_result(item['html'])
-        t.id = item['id']
-        t
-      }
 
       res.headers["Content-Type"] = "application/json; charset=utf-8"
-      res.write j.to_json
+      if data = cached(from,to,location)
+        res.write data
+      else
+        params = new_params(from,to,location)
+        url = URL_BASE + params_to_url(params)
+        doc = JSON.parse(open(url).read)
+        items = doc["items"]
+
+        p params
+        p url
+
+        j = items.map { |item|
+          t = parse_result(item['html'])
+          t.id = item['id']
+          t
+        }
+
+        cache_now(from,to,location,j.to_json)
+        res.write j.to_json
+      end
     end
   end
 end

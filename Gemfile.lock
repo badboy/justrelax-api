@@ -8,6 +8,7 @@ GEM
       rack
     cuba-contrib (3.1.0)
       cuba (~> 3.1)
+    hiredis (0.6.0)
     method_source (0.8.2)
     mote (1.1.3)
     oga (1.0.0)
@@ -18,6 +19,8 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     rack (1.6.0)
+    redic (1.5.0)
+      hiredis
     ruby-ll (2.1.1)
       ansi
       ast
@@ -33,3 +36,4 @@ DEPENDENCIES
   oga
   pry
   rack
+  redic
