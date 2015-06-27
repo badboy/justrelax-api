@@ -8,10 +8,15 @@ GEM
       rack
     cuba-contrib (3.1.0)
       cuba (~> 3.1)
+    faraday (0.9.1)
+      multipart-post (>= 1.2, < 3)
+    faraday_middleware (0.9.1)
+      faraday (>= 0.7.4, < 0.10)
     hiredis (0.6.0)
     kgio (2.9.3)
     method_source (0.8.2)
     mote (1.1.3)
+    multipart-post (2.0.0)
     oga (1.0.0)
       ast
       ruby-ll (~> 2.1)
@@ -38,6 +43,8 @@ PLATFORMS
 DEPENDENCIES
   cuba (= 3.3.0)
   cuba-contrib (= 3.1.0)
+  faraday
+  faraday_middleware
   mote (= 1.1.3)
   oga
   pry
