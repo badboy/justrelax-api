@@ -108,7 +108,7 @@ def new_params(from, to, location)
 end
 
 def redis
-  @@redis ||= Redic.new
+  $redis ||= Redic.new
 end
 
 def cached(from,to,location)
