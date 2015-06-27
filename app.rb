@@ -91,7 +91,13 @@ end
 def get_location_id(location)
   url = SUGGEST_BASE + CGI.escape(location)
   doc = JSON.parse(open(url).read)
-  doc["result"].first["p"]
+  results = doc["result"]
+
+  if results.size > 0
+    results.first["p"]
+  else
+    nil
+  end
 end
 
 
@@ -99,6 +105,8 @@ end
 
 def new_params(from, to, location)
   location_id = get_location_id(location)
+  return nil if location_id.nil?
+
   {
     "aDateRange[arr]" => from,
     "aDateRange[dep]" => to,
@@ -138,18 +146,22 @@ Cuba.define do
         res.write data
       else
         params = new_params(from,to,location)
-        url = URL_BASE + params_to_url(params)
-        doc = JSON.parse(open(url).read)
-        items = doc["items"]
+        if params.nil?
+          res.write [].to_json
+        else
+          url = URL_BASE + params_to_url(params)
+          doc = JSON.parse(open(url).read)
+          items = doc["items"]
 
-        j = items.map { |item|
-          t = parse_result(item['html'])
-          t.id = item['id']
-          t
-        }
+          j = items.map { |item|
+            t = parse_result(item['html'])
+            t.id = item['id']
+            t
+          }
 
-        cache_now(from,to,location,j.to_json)
-        res.write j.to_json
+          cache_now(from,to,location,j.to_json)
+          res.write j.to_json
+        end
       end
     end
   end
