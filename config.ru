@@ -4,4 +4,4 @@
 require 'bundler/setup'
 require './app'
 
-run(Cuba)
+run Rack::URLMap.new("/booking" => Cuba)
