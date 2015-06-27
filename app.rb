@@ -86,9 +86,8 @@ Cuba.define do
   on get do
     on "holiday", param("from"), param("to"), param("location") do |from,to,location|
 
-      roomtype = req.params["room"] || "double"
-
-      price_max   = req.params["price_max"]
+      roomtype  = req.params["room"] || "double"
+      price_max = req.params["price_max"] || 5000
 
       more = {
         roomtype:    roomtype,
