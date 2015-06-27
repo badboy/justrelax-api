@@ -142,9 +142,6 @@ Cuba.define do
         doc = JSON.parse(open(url).read)
         items = doc["items"]
 
-        p params
-        p url
-
         j = items.map { |item|
           t = parse_result(item['html'])
           t.id = item['id']
