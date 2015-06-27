@@ -43,8 +43,8 @@ def new_params(from, to, more)
 
   params["roomType"] = more[:roomtype].upcase
 
-  if more[:price_max]
-    params["maxPrice"]   = more[:price_max]
+  if more[:max_price]
+    params["maxPrice"]   = more[:max_price]
   end
 
   params
@@ -87,15 +87,15 @@ Cuba.define do
     on "holiday", param("from"), param("to"), param("location") do |from,to,location|
 
       roomtype  = req.params["room"] || "double"
-      price_max = req.params["price_max"] || 5000
+      max_price = req.params["max_price"] || 5000
 
       more = {
         roomtype:    roomtype,
-        price_max:   price_max
+        max_price:   max_price
       }
 
       res.headers["Content-Type"] = "application/json; charset=utf-8"
-      if data = cached(from,to,location, more)
+      if data = cached(from, to, location, more)
         res.write data
       else
         t = TrivagoClient.new

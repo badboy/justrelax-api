@@ -8,4 +8,4 @@
 
 * `roomtype`: One of `[single, double, family]`
     * `family` not implemented yet
-* `price_max`: Maximum allowed price in €
+* `max_price`: Maximum allowed price in €
