@@ -4,6 +4,7 @@ gem "rack"
 gem "oga"
 gem "pry"
 gem "redic"
+gem "unicorn"
 
 gem "cuba", "3.3.0"
 gem "mote", "1.1.3"
