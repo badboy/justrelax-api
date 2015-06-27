@@ -102,7 +102,6 @@ Cuba.define do
 
         params = new_params(from, to, more)
         items = t.location_search(location, params)
-        p items
 
         if items.empty? || items['hotels'].empty?
           res.write [].to_json
