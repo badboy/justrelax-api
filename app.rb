@@ -143,12 +143,17 @@ Cuba.define do
           hotels = items['hotels']
           j = hotels.map { |hotel|
             offer = hotel['offers'][0]
+            price = offer['price'] if offer
+            price = price['value'] if price
+
+            link = offer['link'] if offer
+
             {
               name:   hotel['name'],
-              price:  offer['price']['value'],
+              price:  price || 0,
               city:   hotel['city'],
               image:  hotel['imageUrl'],
-              link:   offer['link'],
+              link:   link || "",
             }
           }
 
