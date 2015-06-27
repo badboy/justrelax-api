@@ -43,6 +43,9 @@ def new_params(from, to, more)
 
   params["roomType"] = more[:roomtype].upcase
 
+  params["categoryRange"] = more[:category] if more[:category]
+  params["overallLiking"] = more[:like]     if more[:like]
+
   if more[:max_price]
     params["maxPrice"]   = more[:max_price]
   end
@@ -74,6 +77,33 @@ def cache_now(from, to, location, data, more)
   redis.call("SET", key, data, "EX", 60*60)
 end
 
+def map_category(cat)
+  return "1,2,3,4,5" if cat.nil?
+
+  case cat
+  when "shit"
+    return ""
+  when "best"
+    return "5"
+  else
+    return "1,2,3,4,5"
+  end
+end
+
+def map_liking(like)
+  return "1,2,3,4,5" if like.nil?
+
+  case cat
+  when "shit"
+    return "1"
+  when "best"
+    return "5"
+  else
+    return "1,2,3,4,5"
+  end
+end
+
+
 Cuba.plugin Cuba::Mote
 Cuba.plugin Cuba::TextHelpers
 
@@ -88,10 +118,14 @@ Cuba.define do
 
       roomtype  = req.params["room"] || "double"
       max_price = req.params["max_price"] || 5000
+      category  = map_category(req.params["category"])
+      like      = map_category(req.params["like"])
 
       more = {
         roomtype:    roomtype,
-        max_price:   max_price
+        max_price:   max_price,
+        category:    category,
+        like:        like,
       }
 
       res.headers["Content-Type"] = "application/json; charset=utf-8"

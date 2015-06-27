@@ -9,3 +9,5 @@
 * `roomtype`: One of `[single, double, family]`
     * `family` not implemented yet
 * `max_price`: Maximum allowed price in €
+* `category`: One of `[shit, best, (empty)]`
+* `like`: One of `[shit, best, (empty)]`
