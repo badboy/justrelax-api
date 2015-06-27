@@ -146,12 +146,15 @@ Cuba.define do
             {
               name:   hotel['name'],
               price:  offer['price']['value'],
+              city:   hotel['city'],
+              image:  hotel['imageUrl'],
               link:   offer['link'],
             }
           }
 
-          cache_now(from,to,location,j.to_json, more)
-          res.write j.to_json
+          data = {results: j}
+          cache_now(from,to,location,data.to_json, more)
+          res.write data.to_json
         end
       end
     end
