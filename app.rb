@@ -103,29 +103,61 @@ end
 
 #url = "http://www.trivago.de/search/region?iPathId=36103&iGeoDistanceItem=0&aDateRange%5Barr%5D=2015-07-19&aDateRange%5Bdep%5D=2015-07-20&iRoomType=7&bIsTotalPrice=false&iViewType=0&bIsSeoPage=false&bIsSitemap=false&&_=1435406031769"
 
-def new_params(from, to, location)
+def roomtype_string_to_id(type)
+  case type
+  when "single"
+    1
+  when "double"
+    7
+  when "family"
+    9
+  else
+    7
+  end
+end
+
+def new_params(from, to, location, more)
   location_id = get_location_id(location)
   return nil if location_id.nil?
 
-  {
+  params = {
     "aDateRange[arr]" => from,
     "aDateRange[dep]" => to,
-    "iRoomType"       => "7",
-    "iPathId"         => location_id
+    "iPathId"         => location_id,
   }
+
+  params["iRoomType"] = roomtype_string_to_id(more[:roomtype])
+
+  if more[:price_max]
+    params["aPriceRange[from]"] = 3270
+    params["aPriceRange[to]"]   = more[:price_max].to_i*100
+    params["bIsTotalPrice"]     = "false"
+  end
+
+  params
 end
 
 def redis
   $redis ||= Redic.new
 end
 
-def cached(from,to,location)
+def cache_key(from,to,location,more={})
   key = "%s/%s/%s" % [from,to,location]
+
+  more.each do |k,v|
+    key << "/%s=%s" % [k,v] if k && v
+  end
+
+  key
+end
+
+def cached(from,to,location,more={})
+  key = cache_key(from,to,location,more)
   redis.call("GET", key)
 end
 
-def cache_now(from,to,location,data)
-  key = "%s/%s/%s" % [from,to,location]
+def cache_now(from, to, location, data, more)
+  key = cache_key(from, to, location, more)
   redis.call("SET", key, data, "EX", 60*60)
 end
 
@@ -141,11 +173,20 @@ Cuba.define do
   on get do
     on "holiday", param("from"), param("to"), param("location") do |from,to,location|
 
+      roomtype = req.params["room"] || "single"
+
+      price_max   = req.params["price_max"]
+
+      more = {
+        roomtype:    roomtype,
+        price_max:   price_max
+      }
+
       res.headers["Content-Type"] = "application/json; charset=utf-8"
-      if data = cached(from,to,location)
+      if data = cached(from,to,location, more)
         res.write data
       else
-        params = new_params(from,to,location)
+        params = new_params(from,to,location, more)
         if params.nil?
           res.write [].to_json
         else
@@ -159,7 +200,7 @@ Cuba.define do
             t
           }
 
-          cache_now(from,to,location,j.to_json)
+          cache_now(from,to,location,j.to_json, more)
           res.write j.to_json
         end
       end
